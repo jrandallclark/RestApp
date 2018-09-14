@@ -19,7 +19,7 @@ import java.net.HttpURLConnection;
  */
 public class App {
     private static final String GET_CURRENCIES = "https://api.nexchange.io/en/api/v1/currency/";
-    private static final String POST_CURRENCIES = "http://ptsv2.com/t/3u39w-1536889576/post";
+    private static final String POST_CURRENCIES = ""; //"http://ptsv2.com/t/3u39w-1536889576/post";
 
     public static void main(String[] args) throws IOException {
         Client client = null;
