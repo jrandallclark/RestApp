@@ -2,22 +2,19 @@ package com.restapi.app;
 
 import com.google.gson.Gson;
 import com.sun.tools.javac.util.Assert;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.json.simple.parser.ParseException;
 
+import javax.lang.model.type.ArrayType;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.xml.bind.annotation.XmlRootElement;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 
 /**
- * Hit a REST endpoint and get data
+ * Hit a REST endpoint and get data, then post data and process response
  *
  */
 public class App {
@@ -61,13 +58,9 @@ public class App {
             // post JSON object to uri and assert values returned
             Currency currency = new Currency("CKN", "CarlCash", "1.00000000", 5, true, false, false, false);
 
-            ObjectMapper objectMapper = new ObjectMapper();
-            jsonContent = objectMapper.writeValueAsString(currency);
-            GenericEntity<Currency> entity = new GenericEntity<>(currency, Currency.class);
-
             response = client.target(POST_CURRENCIES)
                     .request(MediaType.APPLICATION_JSON)
-                    .post(Entity.entity(currency, MediaType.APPLICATION_XML));
+                    .post(Entity.entity(currency, MediaType.APPLICATION_JSON));
 
             Assert.check(response.getStatus() == HttpURLConnection.HTTP_OK);
             Assert.check(response.readEntity(String.class).equals("Thank you for this dump. I hope you have a lovely day!"));
@@ -83,7 +76,6 @@ public class App {
         }
     }
 
-    @XmlRootElement
     private static class Currency {
         private String code, name, minimal_amount;
         private int min_confirmations;

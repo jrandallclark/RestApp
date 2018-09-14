@@ -1,2 +1,2 @@
 # RestApp
-Make a call to a REST endpoint which returns a list of crypto currencies
+Make a get request to a REST endpoint which returns a list of crypto currencies. Then make another post request to a dummy REST endpoint and vrify that data is transferred and things work
