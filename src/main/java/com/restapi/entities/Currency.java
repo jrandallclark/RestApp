@@ -1,7 +1,5 @@
 package com.restapi.entities;
 
-import org.codehaus.jackson.annotate.JsonProperty;
-
 public class Currency {
     private String code, name, minimal_amount;
     private int min_confirmations;

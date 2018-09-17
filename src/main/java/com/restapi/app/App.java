@@ -7,10 +7,13 @@ import com.sun.tools.javac.util.Assert;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.net.HttpURLConnection;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Hit a REST endpoint and get data, then post data and process response
@@ -22,11 +25,11 @@ public class App {
 
     public static void main(String[] args) {
         Currency[] currencies = getData(MediaType.APPLICATION_JSON, GET_CURRENCIES, Currency[].class);
-        Currency currency = doWork(currencies);
+        List<Currency> currency = doWork(currencies);
         postData(MediaType.APPLICATION_JSON, POST_CURRENCIES, currency);
     }
 
-    private static <T extends Currency> T doWork(T[] data) {
+    private static <T extends Currency> List<T> doWork(T[] data) {
         // TODO: implement this!
 
         System.out.println("no. of currencies: " + data.length + "\n");
@@ -45,7 +48,9 @@ public class App {
             System.out.println("\n");
         }
 
-        return (T) new Currency("CKN", "CarlCash", "1.00000000", 5, true, false, false, false);
+        List<T> results = new ArrayList<>();
+        results.add((T) new Currency("CKN", "CarlCash", "1.00000000", 5, true, false, false, false));
+        return results;
     }
 
     /**
@@ -91,14 +96,16 @@ public class App {
      * @param payload the data for the post request body
      * @param <T> the generic type for the the object being sent to the REST endpoint
      */
-    private static <T> void postData(final String mediaType, final String postURI, final T payload) {
+    private static <T> void postData(final String mediaType, final String postURI, final List<T> payload) {
         Client client = null;
         Response response = null;
         try {
             client = ClientBuilder.newClient();
+
+            GenericEntity<List<T>> list = new GenericEntity<List<T>>(payload){ };
             response = client.target(postURI)
                     .request(mediaType)
-                    .post(Entity.json(payload));
+                    .post(Entity.json(list));
 
             Assert.check(response.getStatus() == HttpURLConnection.HTTP_OK);
             Assert.check(response.readEntity(String.class).equals("Thank you for this dump. I hope you have a lovely day!"));// TODO: remove this!
