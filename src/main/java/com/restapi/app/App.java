@@ -7,7 +7,6 @@ import com.sun.tools.javac.util.Assert;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -54,12 +53,12 @@ public class App {
     }
 
     /**
-     * Gets the data  from the REST endpoint using a GET request
+     * Gets the data from the REST endpoint via GET request
      * @param mediaType the type for the response from the REST endpoint
-     * @param getURI the rest endpoint for GET request
-     * @param clazz the return type for the data from the response
+     * @param getURI the REST endpoint for GET request
+     * @param clazz the return type for the data in the response
      * @param <T> the generic type for the the object being returned by the REST endpoint
-     * @return a collection of the data from the rest endpoint
+     * @return a collection of the data from the REST endpoint
      */
     private static <T> T[] getData(final String mediaType, final String getURI, final Class<T[]> clazz) {
         Client client = null;
@@ -90,7 +89,7 @@ public class App {
     }
 
     /**
-     * Posts the data to the REST endpoint using a POST request
+     * Posts the data to the REST endpoint via a POST request
      * @param mediaType the type for the response from the REST endpoint
      * @param postURI the rest endpoint for POST request
      * @param payload the data for the post request body
@@ -102,10 +101,9 @@ public class App {
         try {
             client = ClientBuilder.newClient();
 
-            GenericEntity<List<T>> list = new GenericEntity<List<T>>(payload){ };
             response = client.target(postURI)
                     .request(mediaType)
-                    .post(Entity.json(list));
+                    .post(Entity.json(payload));
 
             Assert.check(response.getStatus() == HttpURLConnection.HTTP_OK);
             Assert.check(response.readEntity(String.class).equals("Thank you for this dump. I hope you have a lovely day!"));// TODO: remove this!
