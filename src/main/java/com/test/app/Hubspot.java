@@ -1,8 +1,7 @@
-package com.restapi.app;
+package com.test.app;
 
 import com.google.gson.Gson;
-import com.restapi.entities.Currency;
-import com.sun.tools.javac.util.Assert;
+import com.test.entities.Currency;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -15,12 +14,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Hit a REST endpoint and get data, then post data and process response
+ * Hit a REST endpoint and get data, do some calculation and post data for a SUCCESS response
  *
  */
-public class App {
+public class Hubspot {
     private static final String GET_CURRENCIES = "https://api.nexchange.io/en/api/v1/currency/";
-    private static final String POST_CURRENCIES = ""; // "http://ptsv2.com/t/3u39w-1536889576/post"; // TODO: replace this!
+    private static final String POST_CURRENCIES = "http://ptsv2.com/t/3u39w-1536889576/post"; // TODO: replace this!
 
     public static void main(String[] args) {
         Currency[] currencies = getData(MediaType.APPLICATION_JSON, GET_CURRENCIES, Currency[].class);
@@ -69,8 +68,8 @@ public class App {
                     .request(mediaType)
                     .get();
 
-            Assert.check(response.getStatus() == HttpURLConnection.HTTP_OK);
-            Assert.check(response.getHeaders().get(HttpHeaders.CONTENT_TYPE).get(0).equals(mediaType));
+            assert response.getStatus() == HttpURLConnection.HTTP_OK : " GET unsuccessful";
+            assert response.getHeaders().get(HttpHeaders.CONTENT_TYPE).get(0).equals(mediaType) : " content type for respose doesn't match expected";
 
             // read JSON response and assert values returned
             String jsonContent = response.readEntity(String.class);
@@ -105,8 +104,8 @@ public class App {
                     .request(mediaType)
                     .post(Entity.json(payload));
 
-            Assert.check(response.getStatus() == HttpURLConnection.HTTP_OK);
-            Assert.check(response.readEntity(String.class).equals("Thank you for this dump. I hope you have a lovely day!"));// TODO: remove this!
+            assert response.getStatus() == HttpURLConnection.HTTP_OK : " POST unsuccessful";
+            assert response.readEntity(String.class).equals("Thank you for this dump. I hope you have a lovely day!") : " POST unsuccessful"; // TODO: remove this!
 
         } finally {
             if (response != null) {

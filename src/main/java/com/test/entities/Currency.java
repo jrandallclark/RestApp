@@ -1,4 +1,4 @@
-package com.restapi.entities;
+package com.test.entities;
 
 public class Currency {
     private String code, name, minimal_amount;
