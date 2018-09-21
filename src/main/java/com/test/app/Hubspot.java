@@ -7,7 +7,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.test.entities.Invitation;
 import com.test.entities.Partner;
-import org.codehaus.jackson.map.SerializationConfig;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -16,10 +15,8 @@ import org.json.simple.parser.ParseException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.net.HttpURLConnection;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -43,18 +40,10 @@ public class Hubspot {
         Map<String, Map<Date, Collection<Partner>>> countryToDateFeasibilityMap = new HashMap<>();
         for (Partner partner : partners) {
             // find out which partners in a country can attend on a given date
-            Map<Date, Collection<Partner>> dateFeasibilityMap = countryToDateFeasibilityMap.get(partner.getCountry());
-            if (dateFeasibilityMap == null) {
-                dateFeasibilityMap = new TreeMap<>();
-                countryToDateFeasibilityMap.put(partner.getCountry(), dateFeasibilityMap);
-            }
+            Map<Date, Collection<Partner>> dateFeasibilityMap = countryToDateFeasibilityMap.computeIfAbsent(partner.getCountry(), k -> new TreeMap<>());
 
             for (Date availableDate : partner.getAvailableDates()) {
-                Collection<Partner> partnersWhoCanAttend = dateFeasibilityMap.get(availableDate);
-                if (partnersWhoCanAttend == null) {
-                    partnersWhoCanAttend = new HashSet<>();
-                    dateFeasibilityMap.put(availableDate, partnersWhoCanAttend);
-                }
+                Collection<Partner> partnersWhoCanAttend = dateFeasibilityMap.computeIfAbsent(availableDate, k -> new HashSet<>());
                 partnersWhoCanAttend.add(partner);
             }
         }
@@ -63,13 +52,13 @@ public class Hubspot {
         List<Invitation> invitations = new ArrayList<>();
         for (Map.Entry<String, Map<Date, Collection<Partner>>>  countryToDateFeasibilityEntry : countryToDateFeasibilityMap.entrySet()) {
             String country = countryToDateFeasibilityEntry.getKey();
-            Map<Date, Collection<Partner>> dateFesiabilityMap = countryToDateFeasibilityEntry.getValue();
+            Map<Date, Collection<Partner>> dateFeasibilityMap = countryToDateFeasibilityEntry.getValue();
 
             int maxAttendeeCount = Integer.MIN_VALUE;
             Date bestStartDate = null;
             Collection<Partner> maxAttendees = Collections.emptyList();
 
-            List<Map.Entry<Date, Collection<Partner>>> dateFeasibilityEntries = new ArrayList<>(dateFesiabilityMap.entrySet());
+            List<Map.Entry<Date, Collection<Partner>>> dateFeasibilityEntries = new ArrayList<>(dateFeasibilityMap.entrySet());
             for (int i = 0; i < dateFeasibilityEntries.size() - 1; i++) {
                 Date currentDate = dateFeasibilityEntries.get(i).getKey();
                 Date nextDate = dateFeasibilityEntries.get(i + 1).getKey();
@@ -77,13 +66,12 @@ public class Hubspot {
                 // check whether dates are consecutive
                 long diffInMillis = Math.abs(nextDate.getTime() - currentDate.getTime());
                 long diff = TimeUnit.DAYS.convert(diffInMillis, TimeUnit.MILLISECONDS);
-                if (diff != 1) {
+                if (diff != 1 || !dateFeasibilityEntries.get(i).getValue().equals(dateFeasibilityEntries.get(i + 1).getValue())) {
                     continue;
                 }
 
                 Set<Partner> attendees = new HashSet<>();
                 attendees.addAll(dateFeasibilityEntries.get(i).getValue());
-                attendees.addAll(dateFeasibilityEntries.get(i + 1).getValue());
 
                 if (attendees.size() > maxAttendeeCount) {
                     maxAttendeeCount = attendees.size();
@@ -112,9 +100,6 @@ public class Hubspot {
             response = client.target(getURI)
                     .request(mediaType)
                     .get();
-
-            assert response.getStatus() == HttpURLConnection.HTTP_OK : " GET unsuccessful";
-            assert response.getHeaders().get(HttpHeaders.CONTENT_TYPE).get(0).equals(mediaType) : " content type for response doesn't match expected";
 
             // read JSON response and assert values returned
             String jsonContent = response.readEntity(String.class);
@@ -175,8 +160,6 @@ public class Hubspot {
             response = client.target(postURI)
                     .request(mediaType)
                     .post(Entity.json(invitationData));
-
-            System.out.println(invitationData + "\n" + response.getStatus());
 
         } catch (JsonProcessingException e) {
             e.printStackTrace();
