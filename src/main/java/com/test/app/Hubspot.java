@@ -31,9 +31,9 @@ public class Hubspot {
     private static final String DATE_FORMAT = "yyyy-MM-dd";
 
     public static void main(String[] args) {
-        List<Partner> partners = getData(MediaType.APPLICATION_JSON, GET_PARTNERS);
+        List<Partner> partners = getData(MediaType.APPLICATION_JSON, GET_PARTNERS, "partners");
         List<Invitation> invitations = doWork(partners);
-        postData(MediaType.APPLICATION_JSON, POST_INVITATIONS, invitations);
+        postData(MediaType.APPLICATION_JSON, POST_INVITATIONS, invitations, "countries");
     }
 
     private static List<Invitation> doWork(List<Partner> partners) {
@@ -92,7 +92,7 @@ public class Hubspot {
      * @param getURI the REST endpoint for GET requestd
      * @return a collection of the data from the REST endpoint
      */
-    private static List<Partner> getData(final String mediaType, final String getURI) {
+    private static List<Partner> getData(final String mediaType, final String getURI, final String mapKey) {
         Client client = null;
         Response response = null;
         try {
@@ -108,7 +108,7 @@ public class Hubspot {
             Object jsonObject = parser.parse(jsonContent);
 
             JSONObject jsonData = (JSONObject) jsonObject;
-            JSONArray jsonArray = (JSONArray) jsonData.get("partners");
+            JSONArray jsonArray = (JSONArray) jsonData.get(mapKey);
             Gson gson = new GsonBuilder().setDateFormat(DATE_FORMAT).create();
 
             List<Partner> payloadData = new LinkedList<>();
@@ -142,7 +142,7 @@ public class Hubspot {
      * @param postURI the rest endpoint for POST request
      * @param invitations the data for the post request body
      */
-    private static void postData(final String mediaType, final String postURI, final List<Invitation> invitations)  {
+    private static void postData(final String mediaType, final String postURI, final List<Invitation> invitations, final String mapKey)  {
         Client client = null;
         Response response = null;
         try {
@@ -155,7 +155,7 @@ public class Hubspot {
             String arrayToJson = objectMapper.writeValueAsString(invitations);
 
             // build up the payload string for POST request
-            String invitationData = String.format("{ \"countries\": %s }", arrayToJson);
+            String invitationData = String.format("{ \"%s\": %s }", mapKey, arrayToJson);
 
             response = client.target(postURI)
                     .request(mediaType)

@@ -1,7 +1,5 @@
 package com.test.entities;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-
 import java.util.Date;
 
 public class Invitation {
