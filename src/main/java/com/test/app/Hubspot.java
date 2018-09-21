@@ -174,9 +174,9 @@ public class Hubspot {
 
             response = client.target(postURI)
                     .request(mediaType)
-                    .post(Entity.text(invitationData));
+                    .post(Entity.json(invitationData));
 
-            assert response.getStatus() == HttpURLConnection.HTTP_OK : " POST unsuccessful";
+            System.out.println(invitationData + "\n" + response.getStatus());
 
         } catch (JsonProcessingException e) {
             e.printStackTrace();
