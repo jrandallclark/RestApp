@@ -1,4 +1,4 @@
-# HubSpot Project
+# HS Project
 It’s your first day at HubSpot, and you’re in charge of writing the logic to send invitations to a special two-day event in each country for HubSpot’s partners in those countries. We need to find the dates that’ll work best based on survey results that partners have sent in and determine how many people can attend.
 
 You’re provided with an API that gives you a list of partners, their countries, and which dates they’re available in ISO 8601 format.
